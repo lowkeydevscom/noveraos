@@ -7,33 +7,35 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "smoke-test": "npx tsx src/lib/testing/smoke-test.ts"
   },
   "dependencies": {
+    "@prisma/client": "^5.21.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^0.454.0",
     "next": "14.2.24",
+    "next-auth": "5.0.0-beta.25",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "next-auth": "5.0.0-beta.25",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.4",
-    "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.454.0",
     "zod": "^3.23.8",
-    "zustand": "^5.0.1",
-    "@prisma/client": "^5.21.1"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "typescript": "^5.6.3",
-    "tailwindcss": "^3.4.14",
-    "postcss": "^8.4.47",
     "autoprefixer": "^10.4.20",
-    "prisma": "^5.21.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.24",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.3.3"
+    "postcss": "^8.4.47",
+    "prettier": "^3.3.3",
+    "prisma": "^5.21.1",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
   }
 }

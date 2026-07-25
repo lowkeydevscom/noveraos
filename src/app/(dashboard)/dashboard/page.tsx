@@ -1,10 +1,18 @@
-export default function DashboardPage() {
+import React from "react";
+import { getThoughtsAction } from "@/lib/actions/thought-actions";
+import { ThoughtDumpView } from "@/components/thought-dump/thought-dump-view";
+import { SearchModal } from "@/components/shared/search-modal";
+
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const result = await getThoughtsAction();
+  const initialThoughts = result.success ? result.data : [];
+
   return (
-    <div className="p-8">
-      <h1 className="font-hanken text-3xl font-semibold mb-4">AI Workspace & Thought Dump</h1>
-      <p className="font-sans text-muted-foreground">
-        Capture thoughts and synthesize inquiries.
-      </p>
-    </div>
+    <main className="min-h-screen bg-[var(--color-background)]">
+      <ThoughtDumpView initialThoughts={initialThoughts} />
+      <SearchModal />
+    </main>
   );
 }
