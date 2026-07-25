@@ -1,3 +1,4 @@
+// Added by Antigravity
 "use server";
 
 import { db } from "@/lib/db";
@@ -78,6 +79,8 @@ export async function getThoughtsAction(): Promise<ActionResult<ThoughtItem[]>> 
       orderBy: { createdAt: "desc" },
       take: 50,
     });
+
+    logger.info("THOUGHTS_FETCHED", { userId, count: thoughts.length });
 
     return { success: true, data: thoughts.map(mapThoughtItem) };
   } catch (err) {

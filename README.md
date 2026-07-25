@@ -41,8 +41,16 @@ Before making changes, consult the binding specifications below:
 
 ---
 
-## Quick Start (Phase 0 Complete)
+---
 
-NoveraOS is currently executing **Phase 0 (Documentation Freeze)**.
+<!-- Added by Antigravity -->
+## Local Development & Testing
 
-See [ROADMAP.md](file:///c:/Users/gurpr/noveraos/noveraos/ROADMAP.md) for milestone execution progress.
+Run the following commands locally to start development, run test suites, or verify code quality:
+
+- `pnpm dev`: Start the Next.js development server.
+- `pnpm test`: Execute Vitest unit test suite.
+- `pnpm lint`: Run ESLint to verify code quality.
+- `pnpm test:unit`: Run Vitest unit tests.
+- `pnpm test:e2e`: Run Playwright end-to-end user flow tests.
+

@@ -42,6 +42,7 @@ model Thought {
   @@index([userId, createdAt])
 }
 
+// Added by Antigravity
 model Embedding {
   id        String                 @id @default(uuid())
   thoughtId String                 @unique
@@ -49,6 +50,8 @@ model Embedding {
   model     String
   createdAt DateTime               @default(now())
   thought   Thought                @relation(fields: [thoughtId], references: [id], onDelete: Cascade)
+
+  @@index([thoughtId])
 }
 
 model Conversation {

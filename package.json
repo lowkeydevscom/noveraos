@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/unit",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "playwright test",
     "smoke-test": "npx tsx src/lib/testing/smoke-test.ts"
   },
   "dependencies": {

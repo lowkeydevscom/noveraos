@@ -1,3 +1,4 @@
+// Added by Antigravity
 import { NextRequest, NextResponse } from "next/server";
 import { executeHybridSearch } from "@/lib/ai/hybrid-search";
 import { getAuthenticatedUserId } from "@/lib/actions/action-utils";
