@@ -3,6 +3,8 @@ import { executeHybridSearch } from "@/lib/ai/hybrid-search";
 import { getAuthenticatedUserId } from "@/lib/actions/action-utils";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const userId = await getAuthenticatedUserId();

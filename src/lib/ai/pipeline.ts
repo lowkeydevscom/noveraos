@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
-const EMBEDDING_MODEL = "text-embedding-3-small";
-const VECTOR_DIMENSION = 1536;
+const EMBEDDING_MODEL = "text-embedding-004";
+const VECTOR_DIMENSION = 768;
 
 function generateFallbackEmbedding(text: string): number[] {
   const vector: number[] = new Array(VECTOR_DIMENSION);
@@ -22,26 +22,31 @@ function generateFallbackEmbedding(text: string): number[] {
 }
 
 async function getEmbedding(text: string): Promise<{ vector: number[]; model: string }> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return { vector: generateFallbackEmbedding(text), model: EMBEDDING_MODEL };
   }
 
   try {
-    const res = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ input: text, model: EMBEDDING_MODEL }),
-    });
-    if (!res.ok) throw new Error(`OpenAI API error: ${res.statusText}`);
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "models/text-embedding-004",
+          content: { parts: [{ text }] },
+          outputDimensionality: VECTOR_DIMENSION,
+        }),
+      }
+    );
+    if (!res.ok) throw new Error(`Gemini API error: ${res.statusText}`);
     const json = await res.json();
-    const vector = json.data[0].embedding as number[];
+    const vector = json.embedding?.values as number[];
+    if (!Array.isArray(vector)) throw new Error("Invalid embedding response format");
     return { vector, model: EMBEDDING_MODEL };
   } catch (err) {
-    logger.warn("OPENAI_EMBEDDING_FALLBACK", { error: String(err) });
+    logger.warn("GEMINI_EMBEDDING_FALLBACK", { error: String(err) });
     return { vector: generateFallbackEmbedding(text), model: EMBEDDING_MODEL };
   }
 }

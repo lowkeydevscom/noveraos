@@ -11,14 +11,14 @@ export interface RetrievedThought {
 }
 
 function generateQueryVector(query: string): number[] {
-  const vector: number[] = new Array(1536);
+  const vector: number[] = new Array(768);
   let hash = 0;
   for (let i = 0; i < query.length; i++) {
     hash = (hash << 5) - hash + query.charCodeAt(i);
     hash |= 0;
   }
   let sumSq = 0;
-  for (let i = 0; i < 1536; i++) {
+  for (let i = 0; i < 768; i++) {
     const val = Math.sin(hash + i * 1.618);
     vector[i] = val;
     sumSq += val * val;
@@ -36,14 +36,7 @@ export async function retrieveSemanticContext(
     const queryVector = generateQueryVector(query);
     const vectorStr = `[${queryVector.join(",")}]`;
 
-    const rawRows = await db.$queryRawUnsafe<
-      Array<{
-        id: string;
-        rawContent: string;
-        summary: string | null;
-        similarity: number;
-      }>
-    >(
+    const rawRows = (await db.$queryRawUnsafe(
       `SELECT t.id, t."rawContent", t.summary,
               (1 - (e.vector <=> $1::vector)) as similarity
        FROM "Thought" t
@@ -54,7 +47,12 @@ export async function retrieveSemanticContext(
       vectorStr,
       userId,
       topK
-    );
+    )) as Array<{
+      id: string;
+      rawContent: string;
+      summary: string | null;
+      similarity: number;
+    }>;
 
     if (rawRows.length === 0) {
       const thoughts = await db.thought.findMany({
@@ -63,17 +61,17 @@ export async function retrieveSemanticContext(
         take: topK,
       });
 
-      thoughts.forEach((t) => {
+      thoughts.forEach((t: { id: string; rawContent: string }) => {
         processThoughtBackground(t.id, t.rawContent).catch(() => null);
       });
 
       const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
-      const filtered = thoughts.filter((t) =>
+      const filtered = thoughts.filter((t: { rawContent: string }) =>
         words.some((w) => t.rawContent.toLowerCase().includes(w))
       );
       const finalThoughts = filtered.length > 0 ? filtered : thoughts;
 
-      return finalThoughts.map((t, i) => ({
+      return finalThoughts.map((t: { id: string; rawContent: string; summary: string | null }, i: number) => ({
         index: i + 1,
         id: t.id,
         rawContent: t.rawContent,
@@ -83,8 +81,8 @@ export async function retrieveSemanticContext(
     }
 
     return rawRows
-      .filter((r) => r.similarity >= 0.5)
-      .map((r, i) => ({
+      .filter((r: { similarity: number }) => r.similarity >= 0.5)
+      .map((r: { id: string; rawContent: string; summary: string | null; similarity: number }, i: number) => ({
         index: i + 1,
         id: r.id,
         rawContent: r.rawContent,

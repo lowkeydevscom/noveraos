@@ -25,10 +25,10 @@ async function verifyPipeline() {
   let entityCount = 0;
 
   while (Date.now() - pollStart < 3000) {
-    const rawRows = await db.$queryRawUnsafe<Array<{ count: bigint; dim: number }>>(
+    const rawRows = (await db.$queryRawUnsafe(
       `SELECT COUNT(*)::bigint as count, vector_dims("vector") as dim FROM "Embedding" WHERE "thoughtId" = $1 GROUP BY "vector";`,
       thoughtId
-    );
+    )) as Array<{ count: bigint; dim: number }>;
 
     const thought = await db.thought.findUnique({
       where: { id: thoughtId },
@@ -54,12 +54,12 @@ async function verifyPipeline() {
   console.log(
     `[PASS] Created thought embedding verified in DB within ${elapsedCreateEnrich}ms (< 3s target).`
   );
-  console.log(`  - Vector dimension: ${embeddingVectorLength} (Expected: 1536)`);
+  console.log(`  - Vector dimension: ${embeddingVectorLength} (Expected: 768)`);
   console.log(`  - Generated Summary: "${summaryText}"`);
   console.log(`  - Extracted Entities: ${entityCount}`);
 
-  if (embeddingVectorLength !== 1536) {
-    throw new Error(`[FAIL] Vector dimension is ${embeddingVectorLength}, expected 1536!`);
+  if (embeddingVectorLength !== 768) {
+    throw new Error(`[FAIL] Vector dimension is ${embeddingVectorLength}, expected 768!`);
   }
 
   // Test thought update pipeline

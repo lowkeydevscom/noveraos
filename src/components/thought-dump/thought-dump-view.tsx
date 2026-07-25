@@ -15,15 +15,17 @@ export function ThoughtDumpView({ initialThoughts }: ThoughtDumpViewProps) {
   const [, startTransition] = useTransition();
 
   // Optimistic UI state hook for immediate feedback without page refresh
+  type OptimisticAction = { type: "add"; item?: ThoughtItem; id?: string } | { type: "archive"; item?: ThoughtItem; id?: string };
+
   const [optimisticThoughts, addOptimisticThought] = useOptimistic<
     ThoughtItem[],
-    { type: "add" | "archive"; item?: ThoughtItem; id?: string }
-  >(thoughts, (state, action) => {
+    OptimisticAction
+  >(thoughts, (state: ThoughtItem[], action: OptimisticAction) => {
     if (action.type === "add" && action.item) {
       return [action.item, ...state];
     }
     if (action.type === "archive" && action.id) {
-      return state.filter((t) => t.id !== action.id);
+      return state.filter((t: ThoughtItem) => t.id !== action.id);
     }
     return state;
   });

@@ -3,6 +3,7 @@ import { z } from "zod";
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   AUTH_SECRET: z.string().default("development_secret_placeholder_noveraos"),
+  GEMINI_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
@@ -21,10 +22,11 @@ try {
   } else {
     console.error("[ENVIRONMENT_VALIDATION_ERROR]", error);
   }
-  // Provide safe fallback defaults for non-blocking local evaluation if needed
+  // Provide safe fallback defaults for non-blocking local evaluation & build-time page collection
   parsedEnv = {
     DATABASE_URL: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/noveraos?schema=public",
     AUTH_SECRET: process.env.AUTH_SECRET || "development_secret_placeholder_noveraos",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     SENTRY_DSN: process.env.SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

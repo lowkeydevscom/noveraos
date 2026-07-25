@@ -4,6 +4,8 @@ import { WORKSPACE_SYNTHESIZER_SYSTEM_PROMPT, assembleRAGPrompt } from "@/lib/ai
 import { getAuthenticatedUserId } from "@/lib/actions/action-utils";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const userId = await getAuthenticatedUserId();
@@ -23,27 +25,78 @@ export async function POST(req: NextRequest) {
     const retrievedThoughts = await retrieveSemanticContext(lastUserMessage, userId, 8);
     const ragContext = assembleRAGPrompt(retrievedThoughts);
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
     if (apiKey) {
-      const apiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          stream: true,
-          messages: [
-            { role: "system", content: `${WORKSPACE_SYNTHESIZER_SYSTEM_PROMPT}\n\n${ragContext}` },
-            ...messages.slice(-6),
-          ],
-        }),
-      });
+      const formattedContents = messages.slice(-6).map((m: { role: string; content: string }) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content || "" }],
+      }));
 
-      if (apiRes.ok && apiRes.body) {
-        return new Response(apiRes.body, {
-          headers: { "Content-Type": "text/event-stream" },
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: `${WORKSPACE_SYNTHESIZER_SYSTEM_PROMPT}\n\n${ragContext}` }],
+            },
+            contents: formattedContents,
+          }),
+        }
+      );
+
+      if (geminiRes.ok && geminiRes.body) {
+        const reader = geminiRes.body.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        let buffer = "";
+
+        const transformStream = new ReadableStream({
+          async start(controller) {
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  if (trimmed.startsWith("data: ")) {
+                    const dataStr = trimmed.slice(6);
+                    try {
+                      const json = JSON.parse(dataStr);
+                      const chunkText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                      if (chunkText) {
+                        controller.enqueue(
+                          encoder.encode(
+                            `data: ${JSON.stringify({ choices: [{ delta: { content: chunkText } }] })}\n\n`
+                          )
+                        );
+                      }
+                    } catch {
+                      // Skip invalid json frames
+                    }
+                  }
+                }
+              }
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            } catch (streamErr) {
+              controller.error(streamErr);
+            }
+          },
+        });
+
+        return new Response(transformStream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
         });
       }
     }
