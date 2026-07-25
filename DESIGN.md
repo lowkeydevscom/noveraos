@@ -100,4 +100,12 @@ To preserve product integrity, the UI must **NEVER**:
 - ❌ Use bright, saturated rainbow palettes or distracting neon accent overuse.
 - ❌ Interrupt the user with popups, tooltips, banners, modal surveys, or rate-us prompts.
 - ❌ Hide core actions behind deep multi-level nested dropdown menus.
-- ❌ Display raw unformatted AI JSON st
+- ❌ Display raw unformatted AI JSON strings or cryptic error stack traces to the user.
+
+---
+
+## 9. Cross References
+
+- Design Tokens & Specs: [DESIGN_SYSTEM.md](file:///c:/Users/gurpr/noveraos/noveraos/DESIGN_SYSTEM.md)
+- Complete User Flow Diagrams: [USER_FLOWS.md](file:///c:/Users/gurpr/noveraos/noveraos/USER_FLOWS.md)
+- Product Vision: [VISION.md](file:///c:/Users/gurpr/noveraos/noveraos/VISION.md)
