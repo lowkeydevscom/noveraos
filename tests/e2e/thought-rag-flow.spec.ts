@@ -1,8 +1,8 @@
 // Added by Antigravity
-import { test, expect } from "@playwright/test";
+import { test, expect, PlaywrightPage } from "@playwright/test";
 
 test.describe("Thought Dump & RAG Chat Flow", () => {
-  test("captures a thought, persists it, and receives a cited AI response", async ({ page }) => {
+  test("captures a thought, persists it, and receives a cited AI response", async ({ page }: { page: PlaywrightPage }) => {
     // 1. Navigate to Thought Dump view
     await page.goto("/thought-dump");
     await expect(page).toHaveTitle(/NoveraOS/i);
@@ -10,7 +10,7 @@ test.describe("Thought Dump & RAG Chat Flow", () => {
     // 2. Input and save a new thought
     const thoughtInput = page.locator("#thought-input");
     await thoughtInput.fill("Project Phoenix launch date is set for Q4 with vector search integration.");
-    
+
     const saveButton = page.getByRole("button", { name: /Save Thought/i });
     await saveButton.click();
 
