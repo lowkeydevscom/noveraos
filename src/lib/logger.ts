@@ -33,7 +33,8 @@ class Logger {
   error(event: string, error: unknown, details?: Record<string, unknown>, userId?: string): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
-    console.error(this.format({ level: "ERROR", event, error: errorMessage, details: { ...details, stack }, userId }));
+    const mergedDetails = details ? { ...details, stack } : { stack };
+    console.error(this.format({ level: "ERROR", event, error: errorMessage, details: mergedDetails, userId }));
   }
 
   debug(event: string, details?: Record<string, unknown>, userId?: string): void {
