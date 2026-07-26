@@ -1,11 +1,19 @@
 import { auth } from "@/lib/auth";
+import { verifyFirebaseIdToken } from "@/lib/firebase/admin";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { ThoughtItem } from "@/lib/types/thought";
 
 export const DEMO_USER_ID = "00000000-0000-0000-0000-000000000000";
 
-export async function getAuthenticatedUserId(): Promise<string | null> {
+export async function getAuthenticatedUserId(idToken?: string): Promise<string | null> {
+  if (idToken) {
+    const firebaseUser = await verifyFirebaseIdToken(idToken);
+    if (firebaseUser?.uid) {
+      return firebaseUser.uid;
+    }
+  }
+
   try {
     const session = await auth();
     if (session?.user?.id) {

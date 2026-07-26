@@ -44,7 +44,7 @@ The architecture emphasizes clear separation of concerns, single-direction data 
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                     SERVER & BUSINESS LOGIC LAYER                      │
-│   • Auth Guard (Auth.js)  • Request Validation (Zod)                   │
+│   • Auth Guard (Firebase Auth) • Request Validation (Zod)              │
 │   • Thought Orchestrator  • RAG Query Synthesizer                      │
 └───────────────────┬────────────────────────────────┬───────────────────┘
                     │ Async Background Processing    │ Direct Prisma Queries

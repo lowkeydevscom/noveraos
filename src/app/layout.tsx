@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+import { AuthProvider } from "@/components/providers/AuthProvider";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -51,7 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`dark ${inter.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] antialiased font-sans">
-        <div id="app-root">{children}</div>
+        <AuthProvider>
+          <div id="app-root">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
